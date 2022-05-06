@@ -50,6 +50,15 @@ async function run() {
             res.send(result);
         });
 
+
+        //delete single item item api
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productCOllection.deleteOne(query);
+            res.send(result);
+        });
+
     } finally {
 
     }
