@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
@@ -27,6 +28,16 @@ async function run() {
     try {
         await client.connect();
         const productCOllection = client.db('assignment-11-eco-warehouse').collection('product');
+
+        //AUTH
+        app.post('/login', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
+        });
+
         app.get('/product', async (req, res) => {
             const query = {};
             const cursor = productCOllection.find(query);
@@ -48,6 +59,17 @@ async function run() {
             const newProduct = req.body;
             const result = await productCOllection.insertOne(newProduct);
             res.send(result);
+        });
+
+        //get my items
+        app.get('/myitems', async (req, res) => {
+            const supplierEmail = req.query.email;
+
+            // console.log(email);
+            const query = { supplierEmail: supplierEmail };
+            const cursor = productCOllection.find(query);
+            const products = await cursor.toArray();
+            res.send(products);
         });
 
 
